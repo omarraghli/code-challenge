@@ -13,7 +13,6 @@ import tanger.med.codechallenge.api.dtos.AuthenticationRequestDTO;
 import tanger.med.codechallenge.api.dtos.AuthenticationResponseDTO;
 import tanger.med.codechallenge.api.dtos.RegisterRequestDTO;
 import tanger.med.codechallenge.api.interfaces.AuthenticationService;
-import tanger.med.codechallenge.api.interfaces.JwtService;
 import tanger.med.codechallenge.domain.entities.Token;
 import tanger.med.codechallenge.domain.entities.User;
 import tanger.med.codechallenge.domain.enums.TokenType;
@@ -32,14 +31,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtServiceImpl jwtService;
     private final AuthenticationManager authenticationManager;
 
-    //debug
-    private final UserRepo userRepo;
 
     @Override
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
-
-        Optional<User> u = userRepo.findByEmail(request.getEmail());
-        System.out.println(u.toString());
 
         System.out.println("Before authentication");
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
