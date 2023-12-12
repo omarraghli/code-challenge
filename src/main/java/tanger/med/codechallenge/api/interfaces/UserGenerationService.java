@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Interface defining operations related to user management and data generation.
  */
-public interface UserService {
+public interface UserGenerationService {
 
     /**
      * Generates a list of users with random data.
