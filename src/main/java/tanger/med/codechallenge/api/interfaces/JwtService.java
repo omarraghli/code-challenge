@@ -19,5 +19,9 @@ public interface JwtService {
     public Date extractExpiration(String token);
     public Claims extractAllClaims(String token);
     public Key getSignInKey();
+    public String generateRefreshToken(UserDetails userDetails);
 
-}
+    public String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration);
+
+
+    }

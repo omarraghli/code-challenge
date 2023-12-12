@@ -17,6 +17,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtServiceImpl implements JwtService {
+    private static final long refreshExpiration = 10000;
+
     private static final  String SECRET_KEY = "6d3f5845c0f040710236f42c366643435ed38e4d1c7aa48b41ae12b91816486d";
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -37,6 +39,23 @@ public class JwtServiceImpl implements JwtService {
     public Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    @Override
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+    }
+
+    @Override
+    public String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String generateToken(Map<String,Object> extraClaims,  UserDetails userDetails){

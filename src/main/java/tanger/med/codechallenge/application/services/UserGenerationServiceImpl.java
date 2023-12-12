@@ -16,11 +16,14 @@ import tanger.med.codechallenge.api.interfaces.UserGenerationService;
 import tanger.med.codechallenge.config.ApplicationConfiguration;
 import tanger.med.codechallenge.domain.entities.User;
 import tanger.med.codechallenge.domain.enums.Role;
+import tanger.med.codechallenge.domain.mappers.UserMapper;
+import tanger.med.codechallenge.domain.repositories.TokenRepo;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service class responsible for user-related operations, including the generation of random user data.
@@ -32,8 +35,7 @@ public class UserGenerationServiceImpl implements UserGenerationService {
     private final Faker fakerConfig;
     private final UserRepo userRepo;
     private final ApplicationConfiguration applicationConfiguration;
-
-
+    private final AuthenticationServiceImpl authenticationService;
 
 
     /**
@@ -57,7 +59,7 @@ public class UserGenerationServiceImpl implements UserGenerationService {
             user.setCompany(this.fakerConfig.company().name());
             user.setJobPosition(this.fakerConfig.job().title());
             user.setMobile(this.fakerConfig.phoneNumber().cellPhone());
-            user.setUsername(this.fakerConfig.name().username());
+            //user.setUsername(this.fakerConfig.name().username());
             user.setEmail(this.fakerConfig.internet().emailAddress());
             user.setPassword(this.fakerConfig.internet().password(6, 10)); // Random password between 6 and 10 characters
             user.setRole(this.fakerConfig.random().nextBoolean() ? Role.ADMIN : Role.USER);
@@ -83,7 +85,7 @@ public class UserGenerationServiceImpl implements UserGenerationService {
 
         // Use Jackson to convert users to a JSON string and write to the response output stream
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonUsers = objectMapper.writeValueAsString(users);
+        String jsonUsers = objectMapper.writeValueAsString(users.stream().map(UserMapper::toDTO).collect(Collectors.toList()));
         response.getWriter().write(jsonUsers);
     }
 
@@ -104,10 +106,8 @@ public class UserGenerationServiceImpl implements UserGenerationService {
 
         for (User user : users) {
             // Check for duplicates based on email and username
-            if (this.userRepo.findByEmail(user.getEmail()) == null && userRepo.findByUsername(user.getUsername()) == null) {
-                // Encode password before saving
-                user.setPassword(applicationConfiguration.passwordEncoder().encode(user.getPassword()));
-                userRepo.save(user);
+            if (this.userRepo.findByEmail(user.getEmail()).isEmpty() && userRepo.findByUsername(user.getUsername()).isEmpty()) {
+                authenticationService.register(UserMapper.toDTO(user));
                 importedRecords++;
             }
         }
@@ -122,4 +122,5 @@ public class UserGenerationServiceImpl implements UserGenerationService {
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
 }

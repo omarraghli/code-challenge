@@ -6,9 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
+import tanger.med.codechallenge.api.dtos.RegisterRequestDTO;
 import tanger.med.codechallenge.application.services.UserGenerationServiceImpl;
+import tanger.med.codechallenge.domain.entities.Token;
+import tanger.med.codechallenge.domain.entities.User;
+import tanger.med.codechallenge.domain.repositories.TokenRepo;
+import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Controller class for managing user-related operations.
@@ -19,8 +26,7 @@ import java.io.IOException;
 public class UserGenerationController {
 
     private final UserGenerationServiceImpl userGenerationServiceImpl;
-
-
+    private final UserRepo userRepo;
 
     /**
      * Endpoint for generating and downloading a JSON file containing random users.
@@ -46,4 +52,11 @@ public class UserGenerationController {
     public ResponseEntity<ImportSummaryDTO> uploadUserFile(@RequestParam("file") MultipartFile file) throws IOException {
         return userGenerationServiceImpl.uploadUsersBatch(file);
     }
+
+    @GetMapping("/getUsers")
+    public List<User> getUsers() {
+        return userRepo.findAll();
+    }
+
+
 }
