@@ -1,13 +1,12 @@
 package tanger.med.codechallenge.domain.mappers;
 
-import org.springframework.stereotype.Component;
-import tanger.med.codechallenge.api.dtos.RegisterRequestDTO;
+import tanger.med.codechallenge.api.dtos.UserDTO;
 import tanger.med.codechallenge.domain.entities.User;
 
 public class UserMapper {
 
-    public static RegisterRequestDTO toDTO(User user) {
-        return RegisterRequestDTO.builder()
+    public static UserDTO toDTO(User user) {
+        return UserDTO.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .birthDate(user.getBirthDate())
@@ -24,21 +23,21 @@ public class UserMapper {
                 .build();
     }
 
-    public static User toEntity(RegisterRequestDTO registerRequestDTO) {
+    public static User toEntity(UserDTO userDTO) {
         return User.builder()
-                .firstName(registerRequestDTO.getFirstName())
-                .lastName(registerRequestDTO.getLastName())
-                .birthDate(registerRequestDTO.getBirthDate())
-                .city(registerRequestDTO.getCity())
-                .country(registerRequestDTO.getCountry())
-                .avatar(registerRequestDTO.getAvatar())
-                .company(registerRequestDTO.getCompany())
-                .jobPosition(registerRequestDTO.getJobPosition())
-                .mobile(registerRequestDTO.getMobile())
-                .username(registerRequestDTO.getUsername())
-                .email(registerRequestDTO.getEmail())
-                .password(registerRequestDTO.getPassword())
-                .role(registerRequestDTO.getRole())
+                .firstName(userDTO.getFirstName())
+                .lastName(userDTO.getLastName())
+                .birthDate(userDTO.getBirthDate())
+                .city(userDTO.getCity())
+                .country(userDTO.getCountry())
+                .avatar(userDTO.getAvatar())
+                .company(userDTO.getCompany())
+                .jobPosition(userDTO.getJobPosition())
+                .mobile(userDTO.getMobile())
+                .username(userDTO.getUsername())
+                .email(userDTO.getEmail())
+                .password(userDTO.getPassword())
+                .role(userDTO.getRole())
                 .build();
     }
 }

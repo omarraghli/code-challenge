@@ -7,15 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
-import tanger.med.codechallenge.api.dtos.RegisterRequestDTO;
-import tanger.med.codechallenge.application.services.UserGenerationServiceImpl;
-import tanger.med.codechallenge.domain.entities.Token;
-import tanger.med.codechallenge.domain.entities.User;
-import tanger.med.codechallenge.domain.repositories.TokenRepo;
+import tanger.med.codechallenge.api.dtos.UserDTO;
+import tanger.med.codechallenge.application.services.UserServiceImpl;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,9 +20,9 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users") // Global path for user-related endpoints
-public class UserGenerationController {
+public class UserController {
 
-    private final UserGenerationServiceImpl userGenerationServiceImpl;
+    private final UserServiceImpl userServiceImpl;
     private final UserRepo userRepo;
 
     /**
@@ -39,7 +35,7 @@ public class UserGenerationController {
     @GetMapping("/generate")
     public void generateAndDownloadUsers(@RequestParam(name = "count", defaultValue = "100") int count,
                                          HttpServletResponse response) throws IOException {
-        userGenerationServiceImpl.downloadUsersJson(count, response);
+        userServiceImpl.downloadUsersJson(count, response);
     }
 
     /**
@@ -51,16 +47,24 @@ public class UserGenerationController {
      */
     @PostMapping("/batch")
     public ResponseEntity<ImportSummaryDTO> uploadUserFile(@RequestParam("file") MultipartFile file) throws IOException {
-        return userGenerationServiceImpl.uploadUsersBatch(file);
+        return userServiceImpl.uploadUsersBatch(file);
     }
 
 
     @GetMapping("/getUsers")
-    public Page<User> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
-                               @RequestParam(name = "size", defaultValue = "10") int size) {
-        return this.userGenerationServiceImpl.getAllUsers(page, size);
+    public Page<UserDTO> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
+                                  @RequestParam(name = "size", defaultValue = "10") int size) {
+        return this.userServiceImpl.getAllUsers(page, size);
     }
 
+    @GetMapping("/getUserByEmail")
+    public Optional<UserDTO> getUserByEmail(@RequestParam(name = "email") String email) {
+        return this.userServiceImpl.getUserByEmail(email);
+    }
 
+    @GetMapping("/getUserByUsername")
+    public Optional<UserDTO> getUserByUsername(@RequestParam(name = "username") String username) {
+        return this.userServiceImpl.getUserByUsername(username);
+    }
 
 }

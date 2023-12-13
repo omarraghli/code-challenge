@@ -12,7 +12,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequestDTO {
+public class UserDTO {
     private String firstName;
     private String lastName;
     private Date birthDate;

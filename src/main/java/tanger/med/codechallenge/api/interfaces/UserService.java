@@ -5,15 +5,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
+import tanger.med.codechallenge.api.dtos.UserDTO;
 import tanger.med.codechallenge.domain.entities.User;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Interface defining operations related to user management and data generation.
  */
-public interface UserGenerationService {
+public interface UserService {
 
     /**
      * Generates a list of users with random data.
@@ -41,6 +43,9 @@ public interface UserGenerationService {
      */
     ResponseEntity<ImportSummaryDTO> uploadUsersBatch(MultipartFile file) throws IOException;
 
-    public Page<User> getAllUsers(int page, int size);
+    public Page<UserDTO> getAllUsers(int page, int size);
 
+    Optional<UserDTO> getUserByEmail(String email);
+
+    Optional<UserDTO> getUserByUsername(String email);
 }

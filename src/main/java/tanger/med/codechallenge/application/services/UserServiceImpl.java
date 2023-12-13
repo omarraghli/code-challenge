@@ -14,17 +14,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
-import tanger.med.codechallenge.api.interfaces.UserGenerationService;
+import tanger.med.codechallenge.api.dtos.UserDTO;
+import tanger.med.codechallenge.api.interfaces.UserService;
 import tanger.med.codechallenge.config.ApplicationConfiguration;
 import tanger.med.codechallenge.domain.entities.User;
 import tanger.med.codechallenge.domain.enums.Role;
 import tanger.med.codechallenge.domain.mappers.UserMapper;
-import tanger.med.codechallenge.domain.repositories.TokenRepo;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class UserGenerationServiceImpl implements UserGenerationService {
+public class UserServiceImpl implements UserService {
 
     private final Faker fakerConfig;
     private final UserRepo userRepo;
@@ -126,10 +127,19 @@ public class UserGenerationServiceImpl implements UserGenerationService {
     }
 
     @Override
-    public Page<User> getAllUsers(int page, int size) {
+    public Page<UserDTO> getAllUsers(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
+        return this.userRepo.findAll(pageRequest).map(UserMapper::toDTO);
+    }
 
-        return this.userRepo.findAll(pageRequest);
+    @Override
+    public Optional<UserDTO> getUserByEmail(String email) {
+        return this.userRepo.findByEmail(email).map(UserMapper::toDTO);
+    }
+
+    @Override
+    public Optional<UserDTO> getUserByUsername(String email) {
+        return this.userRepo.findByUsername(email).map(UserMapper::toDTO);
     }
 
 }
