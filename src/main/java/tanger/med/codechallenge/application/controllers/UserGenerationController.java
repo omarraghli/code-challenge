@@ -2,6 +2,7 @@ package tanger.med.codechallenge.application.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,10 +54,13 @@ public class UserGenerationController {
         return userGenerationServiceImpl.uploadUsersBatch(file);
     }
 
+
     @GetMapping("/getUsers")
-    public List<User> getUsers() {
-        return userRepo.findAll();
+    public Page<User> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
+                               @RequestParam(name = "size", defaultValue = "10") int size) {
+        return this.userGenerationServiceImpl.getAllUsers(page, size);
     }
+
 
 
 }

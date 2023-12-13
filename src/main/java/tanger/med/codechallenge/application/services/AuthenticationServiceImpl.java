@@ -1,10 +1,9 @@
 package tanger.med.codechallenge.application.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +19,7 @@ import tanger.med.codechallenge.domain.repositories.TokenRepo;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,29 +31,38 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtServiceImpl jwtService;
     private final AuthenticationManager authenticationManager;
 
-
+    //1
     @Override
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
 
-        System.out.println("Before authentication");
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        System.out.println("After authentication");
-
 
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
-        System.out.println(user);
 
         var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
         return AuthenticationResponseDTO.builder()
                 .accessToken(jwtToken)
-                .refreshToken(refreshToken)
                 .build();
     }
 
+    @Override
+    public void revokeAllUserTokens(User user) {
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+
+        if (validUserTokens.isEmpty()) {
+            return;
+        }
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
+    }
+
+    //3
     @Override
     public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
@@ -66,48 +75,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         tokenRepository.save(token);
     }
 
-    @Override
-    public void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
-        if (validUserTokens.isEmpty())
-            return;
-        validUserTokens.forEach(token -> {
-            token.setExpired(true);
-            token.setRevoked(true);
-        });
-        tokenRepository.saveAll(validUserTokens);
-    }
 
     @Override
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String refreshToken;
-        final String userEmail;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return;
-        }
-        refreshToken = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(refreshToken);
-        if (userEmail != null) {
-            var user = this.repository.findByEmail(userEmail)
-                    .orElseThrow();
-            if (jwtService.isTokenValid(refreshToken, user)) {
-                var accessToken = jwtService.generateToken(user);
-                revokeAllUserTokens(user);
-                saveUserToken(user, accessToken);
-                var authResponse = AuthenticationResponseDTO.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .build();
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-            }
-        }
-    }
-
-    @Override
-    public AuthenticationResponseDTO register(RegisterRequestDTO request) {
-
-
+    public void register(RegisterRequestDTO request) {
         var user = User.builder()
                 .email(request.getEmail())
                 .firstName(request.getFirstName())
@@ -123,16 +93,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
-
-        var savedUser = repository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        saveUserToken(savedUser, jwtToken);
-        return AuthenticationResponseDTO.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+        repository.save(user);
     }
-
-
 }

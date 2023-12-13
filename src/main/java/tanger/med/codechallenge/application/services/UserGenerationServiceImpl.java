@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -121,6 +123,13 @@ public class UserGenerationServiceImpl implements UserGenerationService {
                 .build();
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @Override
+    public Page<User> getAllUsers(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return this.userRepo.findAll(pageRequest);
     }
 
 }
