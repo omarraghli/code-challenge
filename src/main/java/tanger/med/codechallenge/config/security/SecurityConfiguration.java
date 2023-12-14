@@ -14,7 +14,7 @@
     @Configuration
     @RequiredArgsConstructor
     public class SecurityConfiguration {
-        private static final String[] WHITE_LIST_URL = {"**"};
+        private static final String[] WHITE_LIST_URL = {"/api/users/generate","/api/users/batch","/api/auth"};
 
         private final JwtAuthenticationFilter jwtAuthFilter;
         private final AuthenticationProvider authenticationProvider;
