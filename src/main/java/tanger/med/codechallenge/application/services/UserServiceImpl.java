@@ -3,8 +3,11 @@ package tanger.med.codechallenge.application.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,39 +15,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
+import tanger.med.codechallenge.api.dtos.UserDTO;
 import tanger.med.codechallenge.api.interfaces.UserService;
-import tanger.med.codechallenge.config.security.SecurityConfig;
+import tanger.med.codechallenge.config.ApplicationConfiguration;
 import tanger.med.codechallenge.domain.entities.User;
 import tanger.med.codechallenge.domain.enums.Role;
+import tanger.med.codechallenge.domain.mappers.UserMapper;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service class responsible for user-related operations, including the generation of random user data.
  */
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final Faker fakerConfig;
     private final UserRepo userRepo;
-    private final SecurityConfig securityConfig;
-
-    /**
-     * Constructs a new UserService with the specified Faker instance for generating random data.
-     *
-     * @param fakerConfig    The Faker instance to be used for data generation.
-     * @param userRepo       The repository for user data access.
-     * @param securityConfig The configuration class for security-related settings.
-     */
-    @Autowired
-    public UserServiceImpl(Faker fakerConfig, UserRepo userRepo, SecurityConfig securityConfig) {
-        this.fakerConfig = fakerConfig;
-        this.userRepo = userRepo;
-        this.securityConfig = securityConfig;
-    }
+    private final ApplicationConfiguration applicationConfiguration;
+    private final AuthenticationServiceImpl authenticationService;
+    private final JwtServiceImpl jwtServiceImpl;
 
     /**
      * Generates a list of random users with the specified count.
@@ -93,7 +89,7 @@ public class UserServiceImpl implements UserService {
 
         // Use Jackson to convert users to a JSON string and write to the response output stream
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonUsers = objectMapper.writeValueAsString(users);
+        String jsonUsers = objectMapper.writeValueAsString(users.stream().map(UserMapper::toDTO).collect(Collectors.toList()));
         response.getWriter().write(jsonUsers);
     }
 
@@ -107,17 +103,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<ImportSummaryDTO> uploadUsersBatch(MultipartFile file) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        List<User> users = objectMapper.readValue(file.getInputStream(), new TypeReference<List<User>>() {});
+        List<User> users = objectMapper.readValue(file.getInputStream(), new TypeReference<List<User>>() {
+        });
 
         int totalRecords = users.size();
         int importedRecords = 0;
 
         for (User user : users) {
             // Check for duplicates based on email and username
-            if (this.userRepo.findByEmail(user.getEmail()) == null && userRepo.findByUsername(user.getUsername()) == null) {
-                // Encode password before saving
-                user.setPassword(securityConfig.passwordEncoder().encode(user.getPassword()));
-                userRepo.save(user);
+            if (this.userRepo.findByEmail(user.getEmail()).isEmpty() && userRepo.findByUsername(user.getUsername()).isEmpty()) {
+                authenticationService.register(UserMapper.toDTO(user));
                 importedRecords++;
             }
         }
@@ -127,9 +122,96 @@ public class UserServiceImpl implements UserService {
         ImportSummaryDTO dto = ImportSummaryDTO.builder()
                 .importedRecords(importedRecords)
                 .failedImportRecords(failedImportRecords)
-                .importedRecords(importedRecords)
+                .totalRecords(totalRecords)
                 .build();
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
+    /**
+     * Retrieves a paginated list of all users.
+     *
+     * @param page The page number.
+     * @param size The number of users per page.
+     * @return A Page of UserDTOs.
+     */
+    @Override
+    public Page<UserDTO> getAllUsers(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return this.userRepo.findAll(pageRequest).map(UserMapper::toDTO);
+    }
+
+    /**
+     * Retrieves a user by email only if the requester has 'ADMIN' role.
+     *
+     * @param email   The email of the user to retrieve.
+     * @param request The HttpServletRequest for authentication.
+     * @return A ResponseEntity containing an Optional<UserDTO>.
+     */
+    @Override
+    public ResponseEntity<Optional<UserDTO>> getUserByEmailOnlyAdmin(String email, HttpServletRequest request) {
+        Optional<UserDTO> tmpUser = getMyUser(request);
+        Role role = Role.USER;
+
+        if (tmpUser.isPresent()) {
+            role = tmpUser.get().getRole();
+        }
+
+        if (role.equals(Role.ADMIN)) {
+            Optional<UserDTO> userDto = this.userRepo.findByEmail(email).map(UserMapper::toDTO);
+            return ResponseEntity.ok(userDto);
+        } else {
+            // User does not have 'ADMIN' role, return forbidden status
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Optional.empty());
+        }
+    }
+
+
+    /**
+     * Retrieves a user by username only if the requester has 'ADMIN' role.
+     *
+     * @param email   The username of the user to retrieve.
+     * @param request The HttpServletRequest for authentication.
+     * @return A ResponseEntity containing an Optional<UserDTO>.
+     */
+    @Override
+    public ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(String email, HttpServletRequest request) {
+        Optional<UserDTO> tmpUser = getMyUser(request);
+        Role role = Role.USER;
+
+        if (tmpUser.isPresent()) {
+            role = tmpUser.get().getRole();
+        }
+
+        if (role.equals(Role.ADMIN)) {
+            Optional<UserDTO> userDto = this.userRepo.findByUsername(email).map(UserMapper::toDTO);
+            return ResponseEntity.ok(userDto);
+        } else {
+            // User does not have 'ADMIN' role, return forbidden status
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Optional.empty());
+        }
+    }
+
+    /**
+     * Retrieves the user associated with the current request.
+     *
+     * @param request The HttpServletRequest for authentication.
+     * @return An Optional<UserDTO> representing the current user.
+     */
+    @Override
+    public Optional<UserDTO> getMyUser(HttpServletRequest request) {
+        //here we are sure to have the email and not the username
+        String authHeader = request.getHeader("Authorization");
+        String jwt;
+        String userEmail;
+
+        jwt = authHeader.substring(7);
+        userEmail = jwtServiceImpl.extractUsername(jwt);
+
+        Optional<User> user = this.userRepo.findByEmail(userEmail);
+
+
+        return user.map(UserMapper::toDTO);
+    }
+
 }

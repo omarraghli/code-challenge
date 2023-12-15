@@ -1,9 +1,10 @@
 package tanger.med.codechallenge.domain.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import tanger.med.codechallenge.domain.entities.User;
+
+import java.util.Optional;
 
 /**
  * JPA repository interface for managing User entities.
@@ -11,7 +12,20 @@ import tanger.med.codechallenge.domain.entities.User;
  */
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
-    public User findByEmail(String email);
-    public User findByUsername(String username);
 
+    /**
+     * Retrieves a user by their email address.
+     *
+     * @param email The email address of the user.
+     * @return An {@link Optional} containing the user, or empty if not found.
+     */
+    Optional<User> findByEmail(String email);
+
+    /**
+     * Retrieves a user by their username.
+     *
+     * @param username The username of the user.
+     * @return An {@link Optional} containing the user, or empty if not found.
+     */
+    Optional<User> findByUsername(String username);
 }
