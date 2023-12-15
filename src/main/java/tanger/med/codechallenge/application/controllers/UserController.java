@@ -1,5 +1,6 @@
 package tanger.med.codechallenge.application.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,10 @@ public class UserController {
      * @throws IOException If an I/O exception occurs during file writing.
      */
     @GetMapping("/generate")
+    @Operation(
+            summary = "Generate and download a JSON file with random users",
+            description = "This endpoint generates and downloads a JSON file containing random users."
+    )
     public void generateAndDownloadUsers(@RequestParam(name = "count", defaultValue = "100") int count,
                                          HttpServletResponse response) throws IOException {
         userServiceImpl.downloadUsersJson(count, response);
@@ -48,6 +53,10 @@ public class UserController {
      * @throws IOException If an I/O exception occurs during file processing.
      */
     @PostMapping(value = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Upload a JSON file with user data in batch",
+            description = "This endpoint allows batch uploading of user data from a JSON file and returns an import summary."
+    )
     public ResponseEntity<ImportSummaryDTO> uploadUserFile(@RequestPart("file") MultipartFile file) throws IOException {
         return userServiceImpl.uploadUsersBatch(file);
     }
@@ -60,6 +69,10 @@ public class UserController {
      * @return A Page containing UserDTOs.
      */
     @GetMapping("/getUsers")
+    @Operation(
+            summary = "Retrieve paginated list of users",
+            description = "This endpoint retrieves a paginated list of users."
+    )
     public Page<UserDTO> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
                                   @RequestParam(name = "size", defaultValue = "10") int size) {
         return this.userServiceImpl.getAllUsers(page, size);
@@ -73,6 +86,10 @@ public class UserController {
      * @return A ResponseEntity containing an Optional<UserDTO>.
      */
     @GetMapping("/email/{email}")
+    @Operation(
+            summary = "Retrieve a user by email for administrators",
+            description = "This endpoint retrieves a user by email for administrators."
+    )
     public ResponseEntity<Optional<UserDTO>> getUserByEmailOnlyAdmin(@PathVariable String email, HttpServletRequest request) {
         return this.userServiceImpl.getUserByEmailOnlyAdmin(email, request);
     }
@@ -85,6 +102,10 @@ public class UserController {
      * @return A ResponseEntity containing an Optional<UserDTO>.
      */
     @GetMapping("/{username}")
+    @Operation(
+            summary = "Retrieve a user by username for administrators",
+            description = "This endpoint retrieves a user by username for administrators."
+    )
     public ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(@PathVariable String username, HttpServletRequest request) {
         return this.userServiceImpl.getUserByUsernameOnlyAdmin(username, request);
     }
@@ -96,6 +117,10 @@ public class UserController {
      * @return An Optional<UserDTO> representing the currently authenticated user.
      */
     @GetMapping("/me")
+    @Operation(
+            summary = "Retrieve the currently authenticated user",
+            description = "This endpoint retrieves the currently authenticated user."
+    )
     public Optional<UserDTO> getMyUser(HttpServletRequest request) {
         return this.userServiceImpl.getMyUser(request);
     }

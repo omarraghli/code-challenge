@@ -1,5 +1,6 @@
 package tanger.med.codechallenge.application.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,8 @@ public class AuthenticationController {
      * @param request The authentication request DTO containing user credentials.
      * @return ResponseEntity containing the authentication response DTO.
      */
+
+    @Operation(summary = "Authenticate User", description = "Generate JWT Token based on username/email and password.")
     @PostMapping("/api/auth")
     public ResponseEntity<AuthenticationResponseDTO> authenticate(
             @RequestBody AuthenticationRequestDTO request
