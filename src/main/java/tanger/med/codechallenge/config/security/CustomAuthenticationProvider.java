@@ -13,11 +13,27 @@ import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.util.Optional;
 
+/**
+ * Custom authentication provider for authenticating users based on email or username and password.
+ * <p>
+ * This class implements the Spring Security AuthenticationProvider interface
+ * to provide custom authentication logic for the application.
+ */
 @Component
 @AllArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
+
     private final UserRepo userRepo;
 
+    /**
+     * Authenticate the user based on the provided authentication object.
+     * <p>
+     * The authentication is performed based on either email or username and password.
+     *
+     * @param authentication The authentication object containing user credentials.
+     * @return A fully authenticated Authentication object if authentication is successful.
+     * @throws AuthenticationException If authentication fails.
+     */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
@@ -40,6 +56,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(user, password, user.get().getAuthorities());
     }
 
+    /**
+     * Check if this AuthenticationProvider supports the provided authentication type.
+     *
+     * @param authentication The authentication class to check for support.
+     * @return True if this AuthenticationProvider supports the provided authentication class, false otherwise.
+     */
     @Override
     public boolean supports(Class<?> authentication) {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);

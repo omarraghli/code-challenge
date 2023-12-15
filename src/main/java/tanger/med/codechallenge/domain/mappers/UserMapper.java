@@ -3,8 +3,17 @@ package tanger.med.codechallenge.domain.mappers;
 import tanger.med.codechallenge.api.dtos.UserDTO;
 import tanger.med.codechallenge.domain.entities.User;
 
+/**
+ * Mapper class for converting between {@link User} entities and {@link UserDTO} data transfer objects.
+ */
 public class UserMapper {
 
+    /**
+     * Converts a {@link User} entity to a {@link UserDTO}.
+     *
+     * @param user The {@link User} entity to convert.
+     * @return A {@link UserDTO} representing the converted user.
+     */
     public static UserDTO toDTO(User user) {
         return UserDTO.builder()
                 .firstName(user.getFirstName())
@@ -23,6 +32,12 @@ public class UserMapper {
                 .build();
     }
 
+    /**
+     * Converts a {@link UserDTO} to a {@link User} entity.
+     *
+     * @param userDTO The {@link UserDTO} to convert.
+     * @return A {@link User} entity representing the converted user.
+     */
     public static User toEntity(UserDTO userDTO) {
         return User.builder()
                 .firstName(userDTO.getFirstName())

@@ -1,5 +1,7 @@
 package tanger.med.codechallenge.api.interfaces;
 
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
 import tanger.med.codechallenge.api.dtos.UserDTO;
 import tanger.med.codechallenge.domain.entities.User;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -42,10 +43,9 @@ public interface UserService {
      * @throws IOException If an I/O exception occurs during file processing.
      */
     ResponseEntity<ImportSummaryDTO> uploadUsersBatch(MultipartFile file) throws IOException;
-
     public Page<UserDTO> getAllUsers(int page, int size);
+    ResponseEntity<Optional<UserDTO>> getUserByEmailOnlyAdmin(String email, HttpServletRequest request);
+    ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(String email, HttpServletRequest request);
+    Optional<UserDTO> getMyUser(HttpServletRequest request);
 
-    Optional<UserDTO> getUserByEmail(String email);
-
-    Optional<UserDTO> getUserByUsername(String email);
 }

@@ -1,7 +1,5 @@
 package tanger.med.codechallenge.application.controllers;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,13 +11,21 @@ import tanger.med.codechallenge.application.services.AuthenticationServiceImpl;
 
 import java.io.IOException;
 
+/**
+ * Controller class for handling authentication-related requests.
+ */
 @RestController
 @RequiredArgsConstructor
-
 public class AuthenticationController {
 
     private final AuthenticationServiceImpl service;
 
+    /**
+     * Handles authentication requests and returns the authentication response.
+     *
+     * @param request The authentication request DTO containing user credentials.
+     * @return ResponseEntity containing the authentication response DTO.
+     */
     @PostMapping("/api/auth")
     public ResponseEntity<AuthenticationResponseDTO> authenticate(
             @RequestBody AuthenticationRequestDTO request

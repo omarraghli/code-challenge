@@ -3,6 +3,7 @@ package tanger.med.codechallenge.application.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final ApplicationConfiguration applicationConfiguration;
     private final AuthenticationServiceImpl authenticationService;
-
+    private final JwtServiceImpl jwtServiceImpl;
 
     /**
      * Generates a list of random users with the specified count.
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
             user.setCompany(this.fakerConfig.company().name());
             user.setJobPosition(this.fakerConfig.job().title());
             user.setMobile(this.fakerConfig.phoneNumber().cellPhone());
-            //user.setUsername(this.fakerConfig.name().username());
+            user.setUsername(this.fakerConfig.name().username());
             user.setEmail(this.fakerConfig.internet().emailAddress());
             user.setPassword(this.fakerConfig.internet().password(6, 10)); // Random password between 6 and 10 characters
             user.setRole(this.fakerConfig.random().nextBoolean() ? Role.ADMIN : Role.USER);
@@ -102,7 +103,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<ImportSummaryDTO> uploadUsersBatch(MultipartFile file) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        List<User> users = objectMapper.readValue(file.getInputStream(), new TypeReference<List<User>>() {});
+        List<User> users = objectMapper.readValue(file.getInputStream(), new TypeReference<List<User>>() {
+        });
 
         int totalRecords = users.size();
         int importedRecords = 0;
@@ -126,20 +128,90 @@ public class UserServiceImpl implements UserService {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a paginated list of all users.
+     *
+     * @param page The page number.
+     * @param size The number of users per page.
+     * @return A Page of UserDTOs.
+     */
     @Override
     public Page<UserDTO> getAllUsers(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return this.userRepo.findAll(pageRequest).map(UserMapper::toDTO);
     }
 
+    /**
+     * Retrieves a user by email only if the requester has 'ADMIN' role.
+     *
+     * @param email   The email of the user to retrieve.
+     * @param request The HttpServletRequest for authentication.
+     * @return A ResponseEntity containing an Optional<UserDTO>.
+     */
     @Override
-    public Optional<UserDTO> getUserByEmail(String email) {
-        return this.userRepo.findByEmail(email).map(UserMapper::toDTO);
+    public ResponseEntity<Optional<UserDTO>> getUserByEmailOnlyAdmin(String email, HttpServletRequest request) {
+        Optional<UserDTO> tmpUser = getMyUser(request);
+        Role role = Role.USER;
+
+        if (tmpUser.isPresent()) {
+            role = tmpUser.get().getRole();
+        }
+
+        if (role.equals(Role.ADMIN)) {
+            Optional<UserDTO> userDto = this.userRepo.findByEmail(email).map(UserMapper::toDTO);
+            return ResponseEntity.ok(userDto);
+        } else {
+            // User does not have 'ADMIN' role, return forbidden status
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Optional.empty());
+        }
     }
 
+
+    /**
+     * Retrieves a user by username only if the requester has 'ADMIN' role.
+     *
+     * @param email   The username of the user to retrieve.
+     * @param request The HttpServletRequest for authentication.
+     * @return A ResponseEntity containing an Optional<UserDTO>.
+     */
     @Override
-    public Optional<UserDTO> getUserByUsername(String email) {
-        return this.userRepo.findByUsername(email).map(UserMapper::toDTO);
+    public ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(String email, HttpServletRequest request) {
+        Optional<UserDTO> tmpUser = getMyUser(request);
+        Role role = Role.USER;
+
+        if (tmpUser.isPresent()) {
+            role = tmpUser.get().getRole();
+        }
+
+        if (role.equals(Role.ADMIN)) {
+            Optional<UserDTO> userDto = this.userRepo.findByUsername(email).map(UserMapper::toDTO);
+            return ResponseEntity.ok(userDto);
+        } else {
+            // User does not have 'ADMIN' role, return forbidden status
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Optional.empty());
+        }
+    }
+
+    /**
+     * Retrieves the user associated with the current request.
+     *
+     * @param request The HttpServletRequest for authentication.
+     * @return An Optional<UserDTO> representing the current user.
+     */
+    @Override
+    public Optional<UserDTO> getMyUser(HttpServletRequest request) {
+        //here we are sure to have the email and not the username
+        String authHeader = request.getHeader("Authorization");
+        String jwt;
+        String userEmail;
+
+        jwt = authHeader.substring(7);
+        userEmail = jwtServiceImpl.extractUsername(jwt);
+
+        Optional<User> user = this.userRepo.findByEmail(userEmail);
+
+
+        return user.map(UserMapper::toDTO);
     }
 
 }

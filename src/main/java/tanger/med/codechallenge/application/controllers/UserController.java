@@ -1,8 +1,10 @@
 package tanger.med.codechallenge.application.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,26 +47,56 @@ public class UserController {
      * @return A ResponseEntity containing the import summary.
      * @throws IOException If an I/O exception occurs during file processing.
      */
-    @PostMapping("/batch")
-    public ResponseEntity<ImportSummaryDTO> uploadUserFile(@RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping(value = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImportSummaryDTO> uploadUserFile(@RequestPart("file") MultipartFile file) throws IOException {
         return userServiceImpl.uploadUsersBatch(file);
     }
 
-
+    /**
+     * Retrieves a paginated list of users.
+     *
+     * @param page The page number (zero-based).
+     * @param size The number of users per page.
+     * @return A Page containing UserDTOs.
+     */
     @GetMapping("/getUsers")
     public Page<UserDTO> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
                                   @RequestParam(name = "size", defaultValue = "10") int size) {
         return this.userServiceImpl.getAllUsers(page, size);
     }
 
-    @GetMapping("/getUserByEmail")
-    public Optional<UserDTO> getUserByEmail(@RequestParam(name = "email") String email) {
-        return this.userServiceImpl.getUserByEmail(email);
+    /**
+     * Retrieves a user by email for administrators.
+     *
+     * @param email   The email of the user to retrieve.
+     * @param request The HttpServletRequest.
+     * @return A ResponseEntity containing an Optional<UserDTO>.
+     */
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Optional<UserDTO>> getUserByEmailOnlyAdmin(@PathVariable String email, HttpServletRequest request) {
+        return this.userServiceImpl.getUserByEmailOnlyAdmin(email, request);
     }
 
-    @GetMapping("/getUserByUsername")
-    public Optional<UserDTO> getUserByUsername(@RequestParam(name = "username") String username) {
-        return this.userServiceImpl.getUserByUsername(username);
+    /**
+     * Retrieves a user by username for administrators.
+     *
+     * @param username The username of the user to retrieve.
+     * @param request  The HttpServletRequest.
+     * @return A ResponseEntity containing an Optional<UserDTO>.
+     */
+    @GetMapping("/{username}")
+    public ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(@PathVariable String username, HttpServletRequest request) {
+        return this.userServiceImpl.getUserByUsernameOnlyAdmin(username, request);
     }
 
+    /**
+     * Retrieves the currently authenticated user.
+     *
+     * @param request The HttpServletRequest.
+     * @return An Optional<UserDTO> representing the currently authenticated user.
+     */
+    @GetMapping("/me")
+    public Optional<UserDTO> getMyUser(HttpServletRequest request) {
+        return this.userServiceImpl.getMyUser(request);
+    }
 }

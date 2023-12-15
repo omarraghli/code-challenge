@@ -25,8 +25,10 @@ import java.util.Optional;
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
+
     private final UserRepo repository;
     private final CustomAuthenticationProvider customAuthenticationProvider;
+
     /**
      * Provides a BCryptPasswordEncoder bean for password encoding.
      *
@@ -37,6 +39,11 @@ public class ApplicationConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Provides a UserDetailsService bean for loading user details by username.
+     *
+     * @return A UserDetailsService bean.
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
@@ -44,7 +51,7 @@ public class ApplicationConfiguration {
             Optional<User> userByUsername = repository.findByUsername(username);
             User tmpUser = null;
 
-            if (userByEmail.isPresent()){
+            if (userByEmail.isPresent()) {
                 tmpUser = userByEmail.get();
             }
 
@@ -52,12 +59,19 @@ public class ApplicationConfiguration {
                 tmpUser = userByUsername.get();
             }
 
+            if (tmpUser == null) {
+                throw new UsernameNotFoundException("User not found");
+            }
+
             return tmpUser;
         };
     }
 
-
-
+    /**
+     * Provides an AuthenticationProvider bean for authentication.
+     *
+     * @return An AuthenticationProvider bean.
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -66,7 +80,13 @@ public class ApplicationConfiguration {
         return authProvider;
     }
 
-
+    /**
+     * Provides an AuthenticationManager bean for authentication.
+     *
+     * @param http The HttpSecurity object for configuring security settings.
+     * @return An AuthenticationManager bean.
+     * @throws Exception If an error occurs during configuration.
+     */
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
@@ -75,6 +95,4 @@ public class ApplicationConfiguration {
 
         return authenticationManagerBuilder.build();
     }
-
-
 }

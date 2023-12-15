@@ -8,6 +8,11 @@ import tanger.med.codechallenge.domain.enums.Role;
 
 import java.util.Date;
 
+/**
+ * Data Transfer Object (DTO) representing user-related information.
+ * <p>
+ * This class is used for transferring user data between different layers of the application.
+ */
 @Data
 @Builder
 @AllArgsConstructor
@@ -26,5 +31,4 @@ public class UserDTO {
     private String email;
     private String password;
     private Role role;
-
 }

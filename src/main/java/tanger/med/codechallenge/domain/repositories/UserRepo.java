@@ -1,12 +1,9 @@
 package tanger.med.codechallenge.domain.repositories;
 
-import org.hibernate.query.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import tanger.med.codechallenge.domain.entities.User;
 
-import java.awt.print.Pageable;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -15,8 +12,20 @@ import java.util.Optional;
  */
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
-    public Optional<User> findByEmail(String email);
 
-    public Optional<User> findByUsername(String username);
+    /**
+     * Retrieves a user by their email address.
+     *
+     * @param email The email address of the user.
+     * @return An {@link Optional} containing the user, or empty if not found.
+     */
+    Optional<User> findByEmail(String email);
 
+    /**
+     * Retrieves a user by their username.
+     *
+     * @param username The username of the user.
+     * @return An {@link Optional} containing the user, or empty if not found.
+     */
+    Optional<User> findByUsername(String username);
 }

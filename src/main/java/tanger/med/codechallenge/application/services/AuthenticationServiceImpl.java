@@ -1,6 +1,5 @@
 package tanger.med.codechallenge.application.services;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,40 +18,54 @@ import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.util.Optional;
 
+/**
+ * Service implementation for authentication-related operations.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+
     private final UserRepo repository;
     private final TokenRepo tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtServiceImpl jwtService;
     private final AuthenticationManager authenticationManager;
 
-    //1
+    /**
+     * Authenticates a user based on the provided credentials and generates an access token.
+     *
+     * @param request The authentication request containing user credentials.
+     * @return An authentication response containing the generated access token.
+     * @throws UsernameNotFoundException If the user is not found by email or username.
+     */
     @Override
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
 
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-            Optional<User> userByEmail = repository.findByEmail(request.getEmail());
-            Optional<User> userByUsername = repository.findByUsername(request.getEmail());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        Optional<User> userByEmail = repository.findByEmail(request.getEmail());
+        Optional<User> userByUsername = repository.findByUsername(request.getEmail());
 
-            var user = userByEmail.orElseGet(() -> {
-                if (userByUsername.isPresent()) {
-                    return userByUsername.get(); // Assign the value found by username to the 'user' variable
-                } else {
-                    throw new UsernameNotFoundException("User not found by email or username");
-                }
-            });
+        var user = userByEmail.orElseGet(() -> {
+            if (userByUsername.isPresent()) {
+                return userByUsername.get(); // Assign the value found by username to the 'user' variable
+            } else {
+                throw new UsernameNotFoundException("User not found by email or username");
+            }
+        });
 
-            var jwtToken = jwtService.generateToken(user);
-            revokeAllUserTokens(user);
-            saveUserToken(user, jwtToken);
-            return AuthenticationResponseDTO.builder()
-                    .accessToken(jwtToken)
-                    .build();
+        var jwtToken = jwtService.generateToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, jwtToken);
+        return AuthenticationResponseDTO.builder()
+                .accessToken(jwtToken)
+                .build();
+    }
 
-        }
-
+    /**
+     * Revokes all valid tokens for a given user.
+     *
+     * @param user The user for whom tokens should be revoked.
+     */
     @Override
     public void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
@@ -67,7 +80,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         tokenRepository.saveAll(validUserTokens);
     }
 
-    //3
+    /**
+     * Saves a user token to the database.
+     *
+     * @param user     The user for whom the token is saved.
+     * @param jwtToken The JWT token to be saved.
+     */
     @Override
     public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
@@ -80,7 +98,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         tokenRepository.save(token);
     }
 
-
+    /**
+     * Registers a new user in the system.
+     *
+     * @param request The user registration request containing user details.
+     */
     @Override
     public void register(UserDTO request) {
         var user = User.builder()
