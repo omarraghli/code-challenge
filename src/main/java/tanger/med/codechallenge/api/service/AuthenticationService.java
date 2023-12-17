@@ -1,5 +1,6 @@
 package tanger.med.codechallenge.api.service;
 
+import org.springframework.http.ResponseEntity;
 import tanger.med.codechallenge.api.dto.AuthenticationRequestDTO;
 import tanger.med.codechallenge.api.dto.AuthenticationResponseDTO;
 import tanger.med.codechallenge.api.dto.UserDTO;
@@ -19,7 +20,7 @@ public interface AuthenticationService {
      * @param request The authentication request containing user credentials.
      * @return An authentication response containing an access token.
      */
-    AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request);
+    ResponseEntity<AuthenticationResponseDTO> authenticate(AuthenticationRequestDTO request);
 
     /**
      * Save the user token for the given user.

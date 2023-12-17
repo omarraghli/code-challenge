@@ -43,9 +43,9 @@ public interface UserService {
      * @throws IOException If an I/O exception occurs during file processing.
      */
     ResponseEntity<ImportSummaryDTO> uploadUsersBatch(MultipartFile file) throws IOException;
-    public Page<UserDTO> getAllUsers(int page, int size);
+    public ResponseEntity<Page<UserDTO>> getAllUsers(int page, int size);
     ResponseEntity<Optional<UserDTO>> getUserByEmailOnlyAdmin(String email, HttpServletRequest request);
     ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(String email, HttpServletRequest request);
-    Optional<UserDTO> getMyUser(HttpServletRequest request);
+    ResponseEntity<Optional<UserDTO>>  getMyUser(HttpServletRequest request);
 
 }
