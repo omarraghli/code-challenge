@@ -105,8 +105,8 @@ public class UserController {
     })
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Page<UserDTO>> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
-                                  @RequestParam(name = "size", defaultValue = "10") int size) {
-        return this.userServiceImpl.getAllUsers(page, size);
+                                  @RequestParam(name = "size", defaultValue = "10") int size, HttpServletRequest request) {
+        return this.userServiceImpl.getAllUsersOnlyAdmin(page, size,request);
     }
 
     /**
