@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.application.services;
+package tanger.med.codechallenge.application.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,10 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
-import tanger.med.codechallenge.api.dtos.UserDTO;
-import tanger.med.codechallenge.api.interfaces.UserService;
-import tanger.med.codechallenge.config.ApplicationConfiguration;
+import tanger.med.codechallenge.api.dto.ImportSummaryDTO;
+import tanger.med.codechallenge.api.dto.UserDTO;
+import tanger.med.codechallenge.api.service.UserService;
+import tanger.med.codechallenge.config.app.ApplicationConfiguration;
 import tanger.med.codechallenge.domain.entities.User;
 import tanger.med.codechallenge.domain.enums.Role;
 import tanger.med.codechallenge.domain.mappers.UserMapper;
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     private final Faker fakerConfig;
     private final UserRepo userRepo;
-    private final ApplicationConfiguration applicationConfiguration;
+    private final UserMapper userMapper;
     private final AuthenticationServiceImpl authenticationService;
     private final JwtServiceImpl jwtServiceImpl;
 
@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
 
         // Use Jackson to convert users to a JSON string and write to the response output stream
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonUsers = objectMapper.writeValueAsString(users.stream().map(UserMapper::toDTO).collect(Collectors.toList()));
+        String jsonUsers = objectMapper.writeValueAsString(users.stream().map(userMapper::toDTO).collect(Collectors.toList()));
         response.getWriter().write(jsonUsers);
     }
 
@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
         for (User user : users) {
             // Check for duplicates based on email and username
             if (this.userRepo.findByEmail(user.getEmail()).isEmpty() && userRepo.findByUsername(user.getUsername()).isEmpty()) {
-                authenticationService.register(UserMapper.toDTO(user));
+                authenticationService.register(userMapper.toDTO(user));
                 importedRecords++;
             }
         }
@@ -138,7 +138,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserDTO> getAllUsers(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        return this.userRepo.findAll(pageRequest).map(UserMapper::toDTO);
+        return this.userRepo.findAll(pageRequest).map(userMapper::toDTO);
     }
 
     /**
@@ -158,7 +158,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (role.equals(Role.ADMIN)) {
-            Optional<UserDTO> userDto = this.userRepo.findByEmail(email).map(UserMapper::toDTO);
+            Optional<UserDTO> userDto = this.userRepo.findByEmail(email).map(userMapper::toDTO);
             return ResponseEntity.ok(userDto);
         } else {
             // User does not have 'ADMIN' role, return forbidden status
@@ -184,7 +184,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (role.equals(Role.ADMIN)) {
-            Optional<UserDTO> userDto = this.userRepo.findByUsername(email).map(UserMapper::toDTO);
+            Optional<UserDTO> userDto = this.userRepo.findByUsername(email).map(userMapper::toDTO);
             return ResponseEntity.ok(userDto);
         } else {
             // User does not have 'ADMIN' role, return forbidden status
@@ -211,7 +211,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = this.userRepo.findByEmail(userEmail);
 
 
-        return user.map(UserMapper::toDTO);
+        return user.map(userMapper::toDTO);
     }
 
 }

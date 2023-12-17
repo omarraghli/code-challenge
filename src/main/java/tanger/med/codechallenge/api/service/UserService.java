@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.api.interfaces;
+package tanger.med.codechallenge.api.service;
 
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
-import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
-import tanger.med.codechallenge.api.dtos.UserDTO;
+import tanger.med.codechallenge.api.dto.ImportSummaryDTO;
+import tanger.med.codechallenge.api.dto.UserDTO;
 import tanger.med.codechallenge.domain.entities.User;
 import java.io.IOException;
 import java.util.List;

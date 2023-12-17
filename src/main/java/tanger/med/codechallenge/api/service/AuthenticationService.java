@@ -1,8 +1,8 @@
-package tanger.med.codechallenge.api.interfaces;
+package tanger.med.codechallenge.api.service;
 
-import tanger.med.codechallenge.api.dtos.AuthenticationRequestDTO;
-import tanger.med.codechallenge.api.dtos.AuthenticationResponseDTO;
-import tanger.med.codechallenge.api.dtos.UserDTO;
+import tanger.med.codechallenge.api.dto.AuthenticationRequestDTO;
+import tanger.med.codechallenge.api.dto.AuthenticationResponseDTO;
+import tanger.med.codechallenge.api.dto.UserDTO;
 import tanger.med.codechallenge.domain.entities.User;
 
 /**

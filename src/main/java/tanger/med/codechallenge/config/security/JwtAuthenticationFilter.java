@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tanger.med.codechallenge.application.services.JwtServiceImpl;
+import tanger.med.codechallenge.application.impl.JwtServiceImpl;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.application.controllers;
+package tanger.med.codechallenge.application.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,9 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import tanger.med.codechallenge.api.dtos.ImportSummaryDTO;
-import tanger.med.codechallenge.api.dtos.UserDTO;
-import tanger.med.codechallenge.application.services.UserServiceImpl;
+import tanger.med.codechallenge.api.dto.ImportSummaryDTO;
+import tanger.med.codechallenge.api.dto.UserDTO;
+import tanger.med.codechallenge.application.impl.UserServiceImpl;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.io.IOException;

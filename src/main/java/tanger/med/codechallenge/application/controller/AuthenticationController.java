@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.application.controllers;
+package tanger.med.codechallenge.application.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -6,11 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import tanger.med.codechallenge.api.dtos.AuthenticationRequestDTO;
-import tanger.med.codechallenge.api.dtos.AuthenticationResponseDTO;
-import tanger.med.codechallenge.application.services.AuthenticationServiceImpl;
-
-import java.io.IOException;
+import tanger.med.codechallenge.api.dto.AuthenticationRequestDTO;
+import tanger.med.codechallenge.api.dto.AuthenticationResponseDTO;
+import tanger.med.codechallenge.application.impl.AuthenticationServiceImpl;
 
 /**
  * Controller class for handling authentication-related requests.

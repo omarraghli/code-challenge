@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.api.dtos;
+package tanger.med.codechallenge.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

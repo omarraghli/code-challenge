@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.config;
+package tanger.med.codechallenge.config.app;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

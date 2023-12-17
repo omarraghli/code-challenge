@@ -3,7 +3,7 @@ package tanger.med.codechallenge;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import tanger.med.codechallenge.application.services.UserServiceImpl;
+import tanger.med.codechallenge.application.impl.UserServiceImpl;
 import tanger.med.codechallenge.domain.entities.User;
 
 import java.util.List;

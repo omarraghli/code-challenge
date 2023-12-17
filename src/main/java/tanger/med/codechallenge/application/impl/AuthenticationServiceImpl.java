@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.application.services;
+package tanger.med.codechallenge.application.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -6,10 +6,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import tanger.med.codechallenge.api.dtos.AuthenticationRequestDTO;
-import tanger.med.codechallenge.api.dtos.AuthenticationResponseDTO;
-import tanger.med.codechallenge.api.dtos.UserDTO;
-import tanger.med.codechallenge.api.interfaces.AuthenticationService;
+import tanger.med.codechallenge.api.dto.AuthenticationRequestDTO;
+import tanger.med.codechallenge.api.dto.AuthenticationResponseDTO;
+import tanger.med.codechallenge.api.dto.UserDTO;
+import tanger.med.codechallenge.api.service.AuthenticationService;
 import tanger.med.codechallenge.domain.entities.Token;
 import tanger.med.codechallenge.domain.entities.User;
 import tanger.med.codechallenge.domain.enums.TokenType;

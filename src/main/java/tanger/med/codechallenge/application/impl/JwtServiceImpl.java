@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.application.services;
+package tanger.med.codechallenge.application.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -8,8 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import tanger.med.codechallenge.api.dtos.UserDTO;
-import tanger.med.codechallenge.api.interfaces.JwtService;
+import tanger.med.codechallenge.api.service.JwtService;
 import tanger.med.codechallenge.domain.entities.User;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 

@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.api.interfaces;
+package tanger.med.codechallenge.api.service;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.security.core.userdetails.UserDetails;
