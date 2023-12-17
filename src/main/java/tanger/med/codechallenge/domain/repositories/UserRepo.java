@@ -2,12 +2,12 @@ package tanger.med.codechallenge.domain.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import tanger.med.codechallenge.domain.entities.User;
+import tanger.med.codechallenge.domain.entity.User;
 
 import java.util.Optional;
 
 /**
- * JPA repository interface for managing User entities.
+ * JPA repository interface for managing User entity.
  * Extends JpaRepository to inherit basic CRUD operations and custom queries.
  */
 @Repository

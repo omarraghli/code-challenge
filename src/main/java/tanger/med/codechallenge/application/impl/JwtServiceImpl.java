@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import tanger.med.codechallenge.api.service.JwtService;
-import tanger.med.codechallenge.domain.entities.User;
+import tanger.med.codechallenge.domain.entity.User;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
 import java.security.Key;

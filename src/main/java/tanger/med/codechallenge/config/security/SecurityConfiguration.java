@@ -1,5 +1,8 @@
 package tanger.med.codechallenge.config.security;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +20,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
+@SecurityScheme(type = SecuritySchemeType.HTTP, name = "bearerAuth", scheme = "bearer",in = SecuritySchemeIn.HEADER)
+
 public class SecurityConfiguration {
 
     private static final String[] WHITE_LIST_URL = {

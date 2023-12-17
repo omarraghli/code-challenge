@@ -3,13 +3,13 @@ package tanger.med.codechallenge.domain.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import tanger.med.codechallenge.domain.entities.Token;
+import tanger.med.codechallenge.domain.entity.Token;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository interface for accessing and managing {@link Token} entities in the database.
+ * Repository interface for accessing and managing {@link Token} entity in the database.
  */
 @Repository
 public interface TokenRepo extends JpaRepository<Token, Long> {

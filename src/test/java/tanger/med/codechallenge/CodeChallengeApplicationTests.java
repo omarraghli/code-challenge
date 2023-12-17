@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import tanger.med.codechallenge.application.impl.UserServiceImpl;
-import tanger.med.codechallenge.domain.entities.User;
+import tanger.med.codechallenge.domain.entity.User;
 
 import java.util.List;
 

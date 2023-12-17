@@ -17,8 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dto.ImportSummaryDTO;
 import tanger.med.codechallenge.api.dto.UserDTO;
 import tanger.med.codechallenge.api.service.UserService;
-import tanger.med.codechallenge.config.app.ApplicationConfiguration;
-import tanger.med.codechallenge.domain.entities.User;
+import tanger.med.codechallenge.domain.entity.User;
 import tanger.med.codechallenge.domain.enums.Role;
 import tanger.med.codechallenge.domain.mappers.UserMapper;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
@@ -38,9 +37,9 @@ public class UserServiceImpl implements UserService {
 
     private final Faker fakerConfig;
     private final UserRepo userRepo;
-    private final UserMapper userMapper;
     private final AuthenticationServiceImpl authenticationService;
     private final JwtServiceImpl jwtServiceImpl;
+    private final UserMapper userMapper;
 
     /**
      * Generates a list of random users with the specified count.

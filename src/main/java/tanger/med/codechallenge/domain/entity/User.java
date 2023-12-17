@@ -1,4 +1,4 @@
-package tanger.med.codechallenge.domain.entities;
+package tanger.med.codechallenge.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

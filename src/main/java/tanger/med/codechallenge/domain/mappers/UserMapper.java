@@ -4,15 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.dozer.DozerBeanMapper;
 import org.springframework.stereotype.Component;
 import tanger.med.codechallenge.api.dto.UserDTO;
-import tanger.med.codechallenge.domain.entities.User;
+import tanger.med.codechallenge.domain.entity.User;
 
 /**
- * Mapper class for converting between {@link User} entities and {@link UserDTO} data transfer objects.
+ * Mapper class for converting between {@link User} entity and {@link UserDTO} data transfer objects.
  */
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
-    private final DozerBeanMapper dozerBeanMapper;
 
     /**
      * Converts a {@link User} entity to a {@link UserDTO}.
@@ -20,8 +19,10 @@ public class UserMapper {
      * @param user The {@link User} entity to convert.
      * @return A {@link UserDTO} representing the converted user.
      */
+    private final DozerBeanMapper dozerBeanMapper;
+
     public UserDTO toDTO(User user) {
-        return this.dozerBeanMapper.map(user, UserDTO.class);
+        return dozerBeanMapper.map(user, UserDTO.class);
     }
 
     /**
@@ -31,7 +32,6 @@ public class UserMapper {
      * @return A {@link User} entity representing the converted user.
      */
     public User toEntity(UserDTO userDTO) {
-        return this.dozerBeanMapper.map(userDTO, User.class);
+        return dozerBeanMapper.map(userDTO, User.class);
     }
-
 }

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dto.ImportSummaryDTO;
 import tanger.med.codechallenge.api.dto.UserDTO;
-import tanger.med.codechallenge.domain.entities.User;
+import tanger.med.codechallenge.domain.entity.User;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
