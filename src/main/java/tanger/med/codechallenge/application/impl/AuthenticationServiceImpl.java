@@ -1,6 +1,7 @@
 package tanger.med.codechallenge.application.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,6 +11,7 @@ import tanger.med.codechallenge.api.dto.AuthenticationRequestDTO;
 import tanger.med.codechallenge.api.dto.AuthenticationResponseDTO;
 import tanger.med.codechallenge.api.dto.UserDTO;
 import tanger.med.codechallenge.api.service.AuthenticationService;
+import tanger.med.codechallenge.config.exception.UserNotFoundException;
 import tanger.med.codechallenge.domain.entity.Token;
 import tanger.med.codechallenge.domain.entity.User;
 import tanger.med.codechallenge.domain.enums.TokenType;
@@ -39,9 +41,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @throws UsernameNotFoundException If the user is not found by email or username.
      */
     @Override
-    public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
+    public ResponseEntity<AuthenticationResponseDTO> authenticate(AuthenticationRequestDTO request) {
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+
         Optional<User> userByEmail = repository.findByEmail(request.getEmail());
         Optional<User> userByUsername = repository.findByUsername(request.getEmail());
 
@@ -49,16 +52,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if (userByUsername.isPresent()) {
                 return userByUsername.get(); // Assign the value found by username to the 'user' variable
             } else {
-                throw new UsernameNotFoundException("User not found by email or username");
+                throw new UserNotFoundException("User not found by email or username");
             }
         });
+
+
 
         var jwtToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
-        return AuthenticationResponseDTO.builder()
+
+        AuthenticationResponseDTO authenticationDTO = AuthenticationResponseDTO.builder()
                 .accessToken(jwtToken)
                 .build();
+
+        return ResponseEntity.ok(authenticationDTO);
     }
 
     /**

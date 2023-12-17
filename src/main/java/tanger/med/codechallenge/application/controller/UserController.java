@@ -104,9 +104,9 @@ public class UserController {
 
     })
     @SecurityRequirement(name = "bearerAuth")
-    public Page<UserDTO> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
-                                  @RequestParam(name = "size", defaultValue = "10") int size) {
-        return this.userServiceImpl.getAllUsers(page, size);
+    public ResponseEntity<Page<UserDTO>> getUsers(@RequestParam(name = "page", defaultValue = "0") int page,
+                                  @RequestParam(name = "size", defaultValue = "10") int size, HttpServletRequest request) {
+        return this.userServiceImpl.getAllUsersOnlyAdmin(page, size,request);
     }
 
     /**
@@ -154,6 +154,7 @@ public class UserController {
                     @Content(schema = @Schema(implementation = BadRequestException.class))
             })
     })
+
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(@PathVariable String username, HttpServletRequest request) {
         return this.userServiceImpl.getUserByUsernameOnlyAdmin(username, request);
@@ -180,7 +181,7 @@ public class UserController {
             })
     })
     @SecurityRequirement(name = "bearerAuth")
-    public Optional<UserDTO> getMyUser(HttpServletRequest request) {
+    public ResponseEntity<Optional<UserDTO>>  getMyUser(HttpServletRequest request) {
         return this.userServiceImpl.getMyUser(request);
     }
 }

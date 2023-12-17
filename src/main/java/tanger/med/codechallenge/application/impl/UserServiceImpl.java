@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,6 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import tanger.med.codechallenge.api.dto.ImportSummaryDTO;
 import tanger.med.codechallenge.api.dto.UserDTO;
 import tanger.med.codechallenge.api.service.UserService;
+import tanger.med.codechallenge.config.exception.FileIsEmptyException;
+import tanger.med.codechallenge.config.exception.UserNotAdminException;
+import tanger.med.codechallenge.config.exception.UserNotFoundException;
 import tanger.med.codechallenge.domain.entity.User;
 import tanger.med.codechallenge.domain.enums.Role;
 import tanger.med.codechallenge.domain.mappers.UserMapper;
@@ -104,7 +106,8 @@ public class UserServiceImpl implements UserService {
         ObjectMapper objectMapper = new ObjectMapper();
         List<User> users = objectMapper.readValue(file.getInputStream(), new TypeReference<List<User>>() {
         });
-
+        if (users.isEmpty())
+            throw new FileIsEmptyException("The uploaded file is empty");
         int totalRecords = users.size();
         int importedRecords = 0;
 
@@ -124,8 +127,33 @@ public class UserServiceImpl implements UserService {
                 .totalRecords(totalRecords)
                 .build();
 
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return ResponseEntity.ok(dto);
     }
+
+
+
+    /**
+     * Checks if the user associated with the provided HttpServletRequest is an admin.
+     *
+     * @param request The HttpServletRequest containing authorization data.
+     * @return {@code true} if the user is an admin, {@code false} otherwise.
+     * @throws UserNotFoundException If the user associated with the request is not found.
+     */
+    @Override
+    public Boolean isAdmin(HttpServletRequest request) throws UserNotFoundException {
+        // Retrieve user data based on authorization data from the request
+        Optional<UserDTO> tmpUser = retrieveUserDataByAuthorizationData(request);
+
+        // Throw UserNotFoundException if user data is not present
+        tmpUser.orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        // Get the user's role
+        Role role = tmpUser.get().getRole();
+
+        // Check if the user is an admin
+        return role.equals(Role.ADMIN);
+    }
+
 
     /**
      * Retrieves a paginated list of all users.
@@ -135,9 +163,23 @@ public class UserServiceImpl implements UserService {
      * @return A Page of UserDTOs.
      */
     @Override
-    public Page<UserDTO> getAllUsers(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        return this.userRepo.findAll(pageRequest).map(userMapper::toDTO);
+    public ResponseEntity<Page<UserDTO>> getAllUsersOnlyAdmin(int page, int size, HttpServletRequest request) {
+        if (isAdmin(request)) {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            Page<UserDTO> userDTOSPage = this.userRepo.findAll(pageRequest).map(userMapper::toDTO);
+            List<UserDTO> userDTOSContent = userDTOSPage.getContent();
+            if (!userDTOSContent.isEmpty())
+                return ResponseEntity.ok(userDTOSPage);
+            else
+                throw new UserNotFoundException("No user is found");
+
+
+        }
+        else {
+            // User does not have 'ADMIN' role, return forbidden status
+            throw new UserNotAdminException("The user should be an admin");
+        }
+
     }
 
     /**
@@ -149,19 +191,14 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ResponseEntity<Optional<UserDTO>> getUserByEmailOnlyAdmin(String email, HttpServletRequest request) {
-        Optional<UserDTO> tmpUser = getMyUser(request);
-        Role role = Role.USER;
-
-        if (tmpUser.isPresent()) {
-            role = tmpUser.get().getRole();
-        }
-
-        if (role.equals(Role.ADMIN)) {
+        if (isAdmin(request)) {
             Optional<UserDTO> userDto = this.userRepo.findByEmail(email).map(userMapper::toDTO);
+            userDto.orElseThrow(() -> new UserNotFoundException("User not found"));
+
             return ResponseEntity.ok(userDto);
         } else {
             // User does not have 'ADMIN' role, return forbidden status
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Optional.empty());
+            throw new UserNotAdminException("The user should be an admin");
         }
     }
 
@@ -175,19 +212,14 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ResponseEntity<Optional<UserDTO>> getUserByUsernameOnlyAdmin(String email, HttpServletRequest request) {
-        Optional<UserDTO> tmpUser = getMyUser(request);
-        Role role = Role.USER;
 
-        if (tmpUser.isPresent()) {
-            role = tmpUser.get().getRole();
-        }
-
-        if (role.equals(Role.ADMIN)) {
+        if (isAdmin(request)) {
             Optional<UserDTO> userDto = this.userRepo.findByUsername(email).map(userMapper::toDTO);
+            userDto.orElseThrow(() -> new UserNotFoundException("User not found"));
             return ResponseEntity.ok(userDto);
         } else {
             // User does not have 'ADMIN' role, return forbidden status
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Optional.empty());
+            throw new UserNotAdminException("The user should be an admin");
         }
     }
 
@@ -198,19 +230,40 @@ public class UserServiceImpl implements UserService {
      * @return An Optional<UserDTO> representing the current user.
      */
     @Override
-    public Optional<UserDTO> getMyUser(HttpServletRequest request) {
-        //here we are sure to have the email and not the username
+    public ResponseEntity<Optional<UserDTO>> getMyUser(HttpServletRequest request) {
+            Optional<UserDTO> userDTO = retrieveUserDataByAuthorizationData(request);
+            // If userDTO is empty, throw UserNotFoundException
+            userDTO.orElseThrow(() -> new UserNotFoundException("User not found"));
+            return ResponseEntity.ok(userDTO);
+    }
+
+
+    /**
+     * Retrieves user data based on the authorization data present in the HttpServletRequest.
+     * This method assumes the use of JWT for authentication and extracts the user's email from the token.
+     *
+     * @param request The HttpServletRequest containing authorization data.
+     * @return An Optional containing UserDTO if the user is found, or an empty Optional if not found.
+     */
+    @Override
+    public Optional<UserDTO> retrieveUserDataByAuthorizationData(HttpServletRequest request) {
+        // Retrieve the JWT from the Authorization header
         String authHeader = request.getHeader("Authorization");
         String jwt;
         String userEmail;
 
+        // Extract the JWT token and user email from it
         jwt = authHeader.substring(7);
         userEmail = jwtServiceImpl.extractUsername(jwt);
 
+        // Retrieve the user from the repository based on the extracted email
         Optional<User> user = this.userRepo.findByEmail(userEmail);
 
+        user.orElseThrow(() -> new UserNotFoundException("User not found"));
 
+        // Map the user entity to a UserDTO if the user is present
         return user.map(userMapper::toDTO);
     }
+
 
 }

@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import tanger.med.codechallenge.application.impl.JwtServiceImpl;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+
 import java.io.IOException;
+import java.security.SignatureException;
 
 /**
  * Custom JWT authentication filter to validate and authenticate incoming JWT tokens.
@@ -55,6 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
+
         userEmail = jwtServiceImpl.extractUsername(jwt);
 
         // If the user email is not null and there is no existing authentication context, perform authentication.

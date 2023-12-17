@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     private static final String[] WHITE_LIST_URL = {
-            "/api/users/generate", "/api/users/batch", "/api/auth",
+            "/api/users/generate", "/api/users/batch", "/api/auth", "/error",
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
     };
 

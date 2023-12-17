@@ -5,13 +5,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import tanger.med.codechallenge.api.service.JwtService;
 import tanger.med.codechallenge.domain.entity.User;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,13 +25,17 @@ import java.util.regex.Pattern;
  * Service implementation for JSON Web Token (JWT) related operations.
  */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
     private final UserRepo userRepo;
-    private static final long refreshExpiration = 10000;
 
-    private static final String SECRET_KEY = "6d3f5845c0f040710236f42c366643435ed38e4d1c7aa48b41ae12b91816486d";
+
+    @Value("${application.security.jwt.expiration}")
+    private long jwtExpiration;
+
+    @Value("${application.security.jwt.secret-key}")
+    private String SECRET_KEY;
 
     /**
      * Extracts the username from the JWT token.
@@ -81,22 +85,11 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**
-     * Generates a refresh token for a user.
-     *
-     * @param userDetails The UserDetails representing the user.
-     * @return The generated refresh token.
-     */
-    @Override
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
-    }
-
-    /**
      * Builds a JWT token with specified claims, user details, and expiration.
      *
-     * @param extraClaims   Additional claims to include in the token.
-     * @param userDetails   The UserDetails representing the user.
-     * @param expiration    The expiration time of the token.
+     * @param extraClaims Additional claims to include in the token.
+     * @param userDetails The UserDetails representing the user.
+     * @param expiration  The expiration time of the token.
      * @return The generated JWT token.
      */
     @Override
@@ -114,15 +107,15 @@ public class JwtServiceImpl implements JwtService {
     /**
      * Checks if a token is valid for a given user.
      *
-     * @param token        The JWT token.
-     * @param userDetails  The UserDetails representing the user.
+     * @param token       The JWT token.
+     * @param userDetails The UserDetails representing the user.
      * @return True if the token is valid, false otherwise.
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = userDetails.getUsername();
         if (isValidEmail(username)) {
             Optional<User> tmpUser = this.userRepo.findByEmail(username);
-            if(tmpUser.isPresent()){
+            if (tmpUser.isPresent()) {
                 username = tmpUser.get().getUsername();
             }
         }
@@ -180,7 +173,7 @@ public class JwtServiceImpl implements JwtService {
         String payload = userDetails.getUsername();
         if (!isValidEmail(payload)) {
             Optional<User> tmpUser = this.userRepo.findByUsername(payload);
-            if(tmpUser.isPresent()){
+            if (tmpUser.isPresent()) {
                 payload = tmpUser.get().getEmail();
             }
         }
@@ -188,7 +181,7 @@ public class JwtServiceImpl implements JwtService {
                 .setClaims(extraClaims)
                 .setSubject(payload)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
