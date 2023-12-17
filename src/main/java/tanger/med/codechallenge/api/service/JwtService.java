@@ -92,13 +92,6 @@ public interface JwtService {
      */
     public Key getSignInKey();
 
-    /**
-     * Generate a refresh token for the given user details.
-     *
-     * @param userDetails    The user details for whom the refresh token is generated.
-     * @return The generated refresh token.
-     */
-    public String generateRefreshToken(UserDetails userDetails);
 
     /**
      * Build a JWT with additional claims for the given user details and expiration duration.

@@ -34,9 +34,6 @@ public class JwtServiceImpl implements JwtService {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
-    @Value("${application.security.jwt.refresh-token.expiration}")
-    private long refreshExpiration;
-
     @Value("${application.security.jwt.secret-key}")
     private String SECRET_KEY;
 
@@ -85,17 +82,6 @@ public class JwtServiceImpl implements JwtService {
     public Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    /**
-     * Generates a refresh token for a user.
-     *
-     * @param userDetails The UserDetails representing the user.
-     * @return The generated refresh token.
-     */
-    @Override
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
     /**
