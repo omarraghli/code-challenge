@@ -28,7 +28,8 @@ import java.util.Optional;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users") // Global path for user-related endpoints
+@RequestMapping("/api/users")
+@CrossOrigin
 public class UserController {
 
     private final UserServiceImpl userServiceImpl;
