@@ -1,6 +1,7 @@
 package tanger.med.codechallenge.config.app;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tanger.med.codechallenge.config.security.CustomAuthenticationProvider;
 import tanger.med.codechallenge.domain.entity.User;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
@@ -23,11 +26,13 @@ import java.util.Optional;
  */
 @Configuration
 @RequiredArgsConstructor
-public class ApplicationConfiguration {
+public class ApplicationConfiguration implements WebMvcConfigurer {
+
 
     private final UserRepo repository;
     private final CustomAuthenticationProvider customAuthenticationProvider;
-
+    @Value("${front.domain}")
+    private String frontDomain;
     /**
      * Provides a BCryptPasswordEncoder bean for password encoding.
      *
@@ -93,5 +98,14 @@ public class ApplicationConfiguration {
         authenticationManagerBuilder.authenticationProvider(this.customAuthenticationProvider);
 
         return authenticationManagerBuilder.build();
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins(frontDomain)
+                .allowCredentials(true)
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*");
     }
 }
