@@ -13,12 +13,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tanger.med.codechallenge.config.security.CustomAuthenticationProvider;
 import tanger.med.codechallenge.domain.entity.User;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
-
 import java.util.Optional;
 
 /**
@@ -26,7 +23,7 @@ import java.util.Optional;
  */
 @Configuration
 @RequiredArgsConstructor
-public class ApplicationConfiguration implements WebMvcConfigurer {
+public class ApplicationConfiguration{
 
 
     private final UserRepo repository;
@@ -98,14 +95,5 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
         authenticationManagerBuilder.authenticationProvider(this.customAuthenticationProvider);
 
         return authenticationManagerBuilder.build();
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins(frontDomain)
-                .allowCredentials(true)
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedHeaders("*");
     }
 }
