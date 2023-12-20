@@ -18,6 +18,7 @@ import tanger.med.codechallenge.domain.enums.TokenType;
 import tanger.med.codechallenge.domain.repositories.TokenRepo;
 import tanger.med.codechallenge.domain.repositories.UserRepo;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -58,7 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
 
-        var jwtToken = jwtService.generateToken(user);
+        String jwtToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
 
@@ -76,7 +77,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      */
     @Override
     public void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
 
         if (validUserTokens.isEmpty()) {
             return;
@@ -96,7 +97,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      */
     @Override
     public void saveUserToken(User user, String jwtToken) {
-        var token = Token.builder()
+        Token token = Token.builder()
                 .user(user)
                 .token(jwtToken)
                 .tokenType(TokenType.BEARER)
@@ -113,7 +114,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      */
     @Override
     public void register(UserDTO request) {
-        var user = User.builder()
+        User user = User.builder()
                 .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
